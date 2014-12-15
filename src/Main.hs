@@ -56,6 +56,9 @@ data STerm = Cell STerm STerm
 data Term a = Var a
            | Apply (Term a) (Term a)
            | Lam (Scope Int Term a)
+           | Set
+           | Prop
+           | Type
            deriving (Eq, Ord, Show, Read)
 
 instance Functor Term where
@@ -119,14 +122,57 @@ hsymbol = some (letter <|> oneOf "->")
 main :: IO ()
 main = repl
 
-data Context = Context (M.Map String ContextEntry)
+data Env = Env (M.Map String Declaration)
+         deriving (Eq, Show)
+
+data Declaration = Assumption Context (Term String)
+                 | Definition Context (Term String) (Term String)
+                 deriving (Eq, Show)
+
+data Context = Context (M.Map String LocalDecl)
              deriving (Eq, Show)
 
-data ContextEntry = Assumption (Term String)
-                  | Definition (Term String) (Term String)
+data LocalDecl = LocalAssumption (Term String)
+               | LocalDefinition (Term String) (Term String)
+               deriving (Eq, Show)
 
+data TypeError =
+      PreviousBinding String (Term String) (Term String)
+    | UnknownError
+    deriving (Eq, Show)
+
+type TypedTerm v = (Term v, Term v)
+
+newtype Name = Name String
+             deriving (Eq, Show)
+
+wf :: Env -> Context -> Either TypeError ()
+wf = error "env + ctxt illformed"
+
+bindingFor :: Env -> Context -> Term String
+bindingFor = error "find term"
+
+check :: Env -> Context -> TypedTerm String -> Either TypeError (Term String)
+check env ctxt (term, ty) =
+    case term of
+        Var v -> do
+            wf env ctxt
+            bindingFor v
+        _ -> error "NYI"
+
+--
 emptyContext :: Context
 emptyContext = Context (M.empty)
+
+-- assume :: Env -> Context -> String -> Term String -> Either TypeError Context
+-- assume env ctxt name ty =
+--     check
+
+isBound :: String -> Context -> Bool
+isBound name ctxt = isJust $ M.lookup name cxt
+
+-- define :: Env -> Context -> String -> Term v -> Term v -> Either TypeError Context
+-- define env ctxt name term ty = _here
 
 eval :: Context -> Term String -> Term String
 eval ctxt e =
