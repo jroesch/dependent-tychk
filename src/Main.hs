@@ -8,7 +8,7 @@ import Text.Parser.Token.Highlight
 import Text.Parser.Token.Style
 import Text.Parser.Char
 import Text.Trifecta.Delta
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isJust)
 import Prelude.Extras
 import System.Console.Haskeline
 import qualified Data.Map as M
@@ -138,26 +138,35 @@ data LocalDecl = LocalAssumption (Term String)
 
 data TypeError =
       PreviousBinding String (Term String) (Term String)
+    | UnknownBinding  String
     | UnknownError
     deriving (Eq, Show)
 
 type TypedTerm v = (Term v, Term v)
 
-newtype Name = Name String
+newtype Ident = Ident String
              deriving (Eq, Show)
 
 wf :: Env -> Context -> Either TypeError ()
 wf = error "env + ctxt illformed"
 
-bindingFor :: Env -> Context -> Term String
-bindingFor = error "find term"
+bindingFor :: Env -> Context -> String -> Either TypeError (Term String)
+bindingFor (Env env) (Context ctxt) name =
+    case M.lookup name env of
+        Nothing -> case M.lookup name ctxt of
+            Nothing -> Left $ UnknownBinding name
+            Just (LocalAssumption ty) -> Right ty
+            Just (LocalDefinition _ ty) -> Right ty
+        Just d -> case d of
+            Assumption _ ty -> Right ty
+            Definition _ _ ty -> Right ty
 
 check :: Env -> Context -> TypedTerm String -> Either TypeError (Term String)
 check env ctxt (term, ty) =
     case term of
         Var v -> do
             wf env ctxt
-            bindingFor v
+            bindingFor env ctxt v
         _ -> error "NYI"
 
 --
@@ -169,7 +178,7 @@ emptyContext = Context (M.empty)
 --     check
 
 isBound :: String -> Context -> Bool
-isBound name ctxt = isJust $ M.lookup name cxt
+isBound name (Context ctxt) = isJust $ M.lookup name ctxt
 
 -- define :: Env -> Context -> String -> Term v -> Term v -> Either TypeError Context
 -- define env ctxt name term ty = _here
