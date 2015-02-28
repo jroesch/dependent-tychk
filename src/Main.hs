@@ -1,13 +1,8 @@
 module Main where
 
 import Bound
-import Control.Applicative
 import Data.List (elemIndex)
 import Text.Trifecta
-import Text.Parser.Token.Highlight
-import Text.Parser.Token.Style
-import Text.Parser.Char
-import Text.Trifecta.Delta
 import Data.Maybe (fromMaybe, isJust)
 import Prelude.Extras
 import System.Console.Haskeline

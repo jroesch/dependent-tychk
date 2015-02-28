@@ -4,18 +4,19 @@ import Bound
 import Control.Applicative
 import Prelude.Extras
 
-data Term a = Ascribe (Term a) (Term a)
-            | Type
-            | Pi (Term a) (Scope Int Term a)
-            | Var a
-            | Apply (Term a) (Term a)
-            | Lam (Scope Int Term a)
+data Term a = Ascribe (Term a) (Term a)      -- e :: T
+            | Type                           -- Type
+            | Pi (Term a) (Scope Int Term a) -- (x : A) => e
+            | Var a                          -- x
+            | Apply (Term a) (Term a)        -- e e'
+            | Lam (Scope Int Term a)         -- \x -> e
             deriving (Eq, Ord, Show, Read)
 
 instance Functor Term where
     fmap f (Var a) = Var (f a)
     fmap f (Apply fun arg) = Apply (fmap f fun) (fmap f arg)
     fmap f (Lam scope) = Lam (fmap f scope)
+    fmap f (Pi
 
 instance Applicative Term where
     pure = return
