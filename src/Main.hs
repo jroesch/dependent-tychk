@@ -27,7 +27,7 @@ repl = runInputT defaultSettings (loop emptyContext)
                       outputStrLn ("Command: " ++ show command)
                       loop ctxt
                   Nothing -> do
-                      runProgram $ lfromMaybe "" minput
+                      runProgram $ fromMaybe "" minput
                       loop ctxt
           runProgram s = case parseTerm s of
                            Left doc -> do
