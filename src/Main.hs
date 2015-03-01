@@ -27,9 +27,7 @@ repl = runInputT defaultSettings (loop emptyContext)
                       outputStrLn ("Command: " ++ show command)
                       loop ctxt
                   Nothing -> do
-                      let input = fromMaybe "" minput
-                      -- let result = parseString parseTopLevel (Columns 0 0) input
-                      runProgram input
+                      runProgram $ lfromMaybe "" minput
                       loop ctxt
           runProgram s = case parseTerm s of
                            Left doc -> do
