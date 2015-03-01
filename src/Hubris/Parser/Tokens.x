@@ -11,7 +11,7 @@ tokens :-
 
   $white+				                ;
   \-\>                          { \s -> TArrow }
-  \\\/                          { \s -> TForall }
+  pi                            { \s -> TForall }
   \\                            { \s -> TLambda }
   let                           { \s -> TLet    }
   in                            { \s -> TIn     }
