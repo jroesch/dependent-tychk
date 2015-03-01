@@ -20,6 +20,7 @@ data TypeErr = InferenceErr
              | NameErr String
              | MismatchErr TyTerm TyTerm
              | MiscErr String
+             | UnimplementedErr String
              deriving (Show)
 
 type TypeCheck a = StateT Context (Either TypeErr) a
@@ -43,7 +44,7 @@ typeCheckWithContext ctxt tm = runStateT (infer tm) ctxt
 -- that a term must check with a certain type or we are checking
 -- a lambda term annotated with a type.
 check :: TyTerm -> TyTerm -> TypeCheck TyTerm
-check (Lam scope) (Pi t t') = error "implement the LAM rule"
+check (Lam scope) (Pi t t') = tyError $ UnimplementedErr "implement the LAM rule"
 check e t = do
    infered <- infer e
    unify t infered
@@ -61,7 +62,7 @@ infer (Ascribe e p) = do
     check e t
     return t
 infer Type = return Type
-infer (Pi _ _) = error "can't check pi types"
+infer (Pi _ _) = tyError $ UnimplementedErr "can't check pi types"
 infer (Var x) = lookupT x
 infer (Apply fun arg) = do
    funT <- infer fun
@@ -87,7 +88,7 @@ tyError e = lift $ Left e
 
 -- Generate a fresh name for type checking.
 freshName :: TypeCheck TyName
-freshName = error "create a fresh name with the counter in the state"
+freshName = tyError $ UnimplementedErr "create a fresh name with the counter in the state"
 
 -- Lookup the type corresponding to a name.
 lookupT :: TyName -> TypeCheck TyTerm
