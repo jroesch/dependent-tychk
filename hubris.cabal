@@ -30,6 +30,7 @@ executable hubris
         haskeline,
         bound,
         prelude-extras,
+        array,
         containers
 
     -- hs-source-dirs:
