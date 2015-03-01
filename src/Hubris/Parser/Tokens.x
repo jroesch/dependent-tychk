@@ -13,12 +13,15 @@ tokens :-
   \-\>                          { \s -> TArrow }
   \\\/                          { \s -> TForall }
   \\                            { \s -> TLambda }
+  let                           { \s -> TLet    }
+  in                            { \s -> TIn     }
   $alpha [$alpha $digit \_ \']* { \s -> TVar s }
   :                             { \s -> TColon }
   \*                            { \s -> TStar }
   \.                            { \s -> TDot }
   \(                            { \s -> TLParens }
   \)                            { \s -> TRParens }
+  =                             { \s -> TEq }
 
 {
 -- Each action has type :: String -> Token
@@ -33,5 +36,8 @@ data Token = TLambda
            | TDot
            | TLParens
            | TRParens
-	deriving (Eq,Show)
+           | TLet
+           | TIn
+           | TEq
+	         deriving (Eq,Show)
 }
