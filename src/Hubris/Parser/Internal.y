@@ -26,13 +26,14 @@ import Data.List
 
 %%
 
-Term : Term0 ':' Term0 { Ascribe $1 $3 }
-     | Term0 Term0 { Apply $1 $2 }
+Term : Term0 ':' Term0                { Ascribe $1 $3 }
+     | Term0 Term0                    { Apply $1 $2 }
+     | Term0                          { $1 }
+     | lambda var arrow Term0         { Lam (abstract (`elemIndex` [$2]) $4) }
+     | forall var ':' Term0 '.' Term0 { Pi $4 (abstract (`elemIndex` [$2]) $6) }
 
-Term0 : '*' { Type }
-      | forall var ':' Term '.' Term { Pi $4 (abstract (`elemIndex` [$2]) $6) }
-      | var { Var $1 }
-      | lambda var arrow Term { Lam (abstract (`elemIndex` [$2]) $4) }
+Term0 : '*'          { Type }
+      | var          { Var $1 }
       | '(' Term ')' { $2 }
 
 {
