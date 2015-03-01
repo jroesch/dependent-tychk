@@ -20,18 +20,21 @@ executable hubris
     main-is:             Main.hs
     other-modules:
       Hubris.Parser
+      Hubris.Parser.Internal
+      Hubris.Parser.Tokens
       Hubris.Syntax
     -- other-extensions:
     build-depends:
         base >=4.7 && <4.8,
-        parsec,
-        parsers,
-        trifecta,
+        -- parsec,
+        -- parsers,
+        -- trifecta,
         haskeline,
         bound,
         prelude-extras,
         array,
         containers
-
+    build-tools:
+      alex, happy
     -- hs-source-dirs:
     default-language:    Haskell2010

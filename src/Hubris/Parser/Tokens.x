@@ -1,5 +1,5 @@
 {
-module Hubris.Tokens where
+module Hubris.Parser.Tokens where
 }
 
 %wrapper "basic"

@@ -2,15 +2,12 @@ module Main where
 
 import Bound
 import Data.List (elemIndex)
-import Text.Trifecta
 import Data.Maybe (fromMaybe, isJust)
 import Prelude.Extras
 import System.Console.Haskeline
 import qualified Data.Map as M
--- import Hubris.Parser
+import Hubris.Parser
 import Hubris.Syntax
-import Hubris.Grammer
-import Hubris.Tokens
 
 repl :: IO ()
 repl = runInputT defaultSettings loop
@@ -24,7 +21,7 @@ repl = runInputT defaultSettings loop
                   Nothing -> do
                       let input = fromMaybe "" minput
                       -- let result = parseString parseTopLevel (Columns 0 0) input
-                      let result = parseGrammer input
+                      let result = parseTerm input
                       case result of
                           Left doc -> do
                               outputStrLn $ "Error! Tokens left: " ++ doc

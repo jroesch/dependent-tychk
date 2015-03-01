@@ -1,8 +1,8 @@
 {
-module Hubris.Grammer (parseGrammer) where
+module Hubris.Parser.Internal (parseTerm) where
 
 import Hubris.Syntax
-import Hubris.Tokens
+import Hubris.Parser.Tokens
 
 import Bound
 import Data.List
@@ -13,7 +13,7 @@ import Data.List
 %monad { Either String }
 %error { parseError }
 
-%token 
+%token
       lambda          { TLambda }
       forall          { TForall }
       var             { TVar $$ }
@@ -38,5 +38,5 @@ Term0 : '*' { Type }
 {
 parseError tkns = Left $ show tkns
 
-parseGrammer = parseTokens . alexScanTokens
+parseTerm = parseTokens . alexScanTokens
 }

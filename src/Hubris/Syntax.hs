@@ -13,10 +13,12 @@ data Term a = Ascribe (Term a) (Term a)      -- e :: T
             deriving (Eq, Ord, Show, Read)
 
 instance Functor Term where
-    fmap f (Var a) = Var (f a)
+    fmap f (Var a)         = Var (f a)
     fmap f (Apply fun arg) = Apply (fmap f fun) (fmap f arg)
-    fmap f (Lam scope) = Lam (fmap f scope)
-    fmap f (Pi
+    fmap f (Lam scope)     = Lam (fmap f scope)
+    fmap f (Pi ty scope)    = Pi (fmap f ty) (fmap f scope)
+    fmap f Type            = Type
+    fmap f (Ascribe e t)   = Ascribe (fmap f e) (fmap f t)
 
 instance Applicative Term where
     pure = return
@@ -27,9 +29,12 @@ instance Applicative Term where
 
 instance Monad Term where
     return = Var
-    Var a     >>= f = f a
-    Apply h g >>= f = Apply (h >>= f) (g >>= f)
-    Lam scope >>= f = Lam (scope >>>= f)
+    Var a       >>= f = f a
+    Apply h g   >>= f = Apply (h >>= f) (g >>= f)
+    Lam scope   >>= f = Lam (scope >>>= f)
+    Pi ty scope >>= f = Pi (ty >>= f) (scope >>>= f)
+    Type        >>= f = Type
+    Ascribe e t >>= f = Ascribe (e >>= f) (t >>= f)
 
 instance Eq1 Term      where (==#)      = (==)
 instance Ord1 Term     where compare1   = compare
