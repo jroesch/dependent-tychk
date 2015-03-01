@@ -11,14 +11,14 @@ import Hubris.Syntax
 import Hubris.TypeCheck
 
 repl :: IO ()
-repl = runInputT defaultSettings loop
-    where loop :: InputT IO ()
-          loop = do
+repl = runInputT defaultSettings (loop emptyContext)
+    where loop :: Context -> InputT IO ()
+          loop ctxt = do
               minput <- getInputLine "hubris> "
               case minput >>= parseCommand of
                   Just command -> do
                       outputStrLn ("Command: " ++ show command)
-                      loop
+                      loop ctxt
                   Nothing -> do
                       let input = fromMaybe "" minput
                       -- let result = parseString parseTopLevel (Columns 0 0) input
@@ -26,11 +26,16 @@ repl = runInputT defaultSettings loop
                       case result of
                           Left doc -> do
                               outputStrLn $ "Error! Tokens left: " ++ doc
-                              loop
+                              loop ctxt
                           Right term -> do
                               outputStrLn (show term)
-                              outputStrLn (show $ typeCheck emptyContext term)
-                              loop
+                              case typeCheckWithContext emptyContext term of
+                                Left e -> do
+                                  outputStrLn ("TypeError: " ++ (show e))
+                                  loop ctxt
+                                Right (result, ctxt') -> do
+                                  outputStrLn (show $ result)
+                                  loop ctxt'
 
 data Command = Quit
              | Help
