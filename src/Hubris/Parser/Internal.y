@@ -28,12 +28,12 @@ import Data.List
       '='             { TEq }
 %%
 
-Term : Term0 ':' Term0                { Ascribe $1 $3 }
-     | Term0 Term0                    { Apply $1 $2 }
-     | Term0                          { $1 }
-     | lambda var arrow Term0         { Lam (abstract (`elemIndex` [$2]) $4) }
-     | forall var ':' Term0 '.' Term0 { Pi $4 (abstract (`elemIndex` [$2]) $6) }
-     | let var '=' Term0 LetExpr       { Let $2 $4 $5 }
+Term : Term0 ':' Term0               { Ascribe $1 $3 }
+     | Term0 Term0                   { Apply $1 $2 }
+     | lambda var arrow Term         { Lam (abstract (`elemIndex` [$2]) $4) }
+     | forall var ':' Term0 '.' Term { Pi $4 (abstract (`elemIndex` [$2]) $6) }
+     | let var '=' Term0 LetExpr     { Let $2 $4 $5 }
+     | Term0                         { $1 }
 
 Term0 : '*'          { Type }
       | var          { Var $1 }
