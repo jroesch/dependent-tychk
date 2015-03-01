@@ -8,6 +8,7 @@ import System.Console.Haskeline
 import qualified Data.Map as M
 import Hubris.Parser
 import Hubris.Syntax
+import Hubris.TypeCheck
 
 repl :: IO ()
 repl = runInputT defaultSettings loop
@@ -26,8 +27,9 @@ repl = runInputT defaultSettings loop
                           Left doc -> do
                               outputStrLn $ "Error! Tokens left: " ++ doc
                               loop
-                          Right a -> do
-                              outputStrLn (show a)
+                          Right term -> do
+                              outputStrLn (show term)
+                              outputStrLn (show $ typeCheck emptyContext term)
                               loop
 
 data Command = Quit
