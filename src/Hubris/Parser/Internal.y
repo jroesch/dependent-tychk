@@ -30,8 +30,8 @@ import Data.List
 
 Term : Term0 ':' Term0               { Ascribe $1 $3 }
      | Term0 Term0                   { Apply $1 $2 }
-     | lambda var arrow Term         { Lam (abstract (`elemIndex` [$2]) $4) }
-     | forall var ':' Term0 '.' Term { Pi $4 (abstract (`elemIndex` [$2]) $6) }
+     | lambda var arrow Term         { Lam (abstract1 $2 $4) }
+     | forall var ':' Term0 '.' Term { Pi $4 (abstract1 $2 $6) }
      | let var '=' Term0 LetExpr     { Let $2 $4 $5 }
      | Term0                         { $1 }
 

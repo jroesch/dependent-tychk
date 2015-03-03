@@ -13,6 +13,9 @@ type TyTerm = Term TyName
 
 data Context = Context { nameMap :: M.Map TyName Type, counter :: Integer }
 
+instance Show Context where
+    show (Context nm _) = show nm
+
 emptyContext :: Context
 emptyContext = Context { nameMap = M.empty, counter = 0 }
 
@@ -44,25 +47,37 @@ typeCheckWithContext ctxt tm = runStateT (infer tm) ctxt
 -- that a term must check with a certain type or we are checking
 -- a lambda term annotated with a type.
 check :: TyTerm -> TyTerm -> TypeCheck TyTerm
-check (Lam scope) (Pi t t') = tyError $ UnimplementedErr "implement the LAM rule"
+check (Lam scope) p @ (Pi t t') = do
+    x <- freshName
+    bindName x t (check (instantiate1 (Var x) scope) (instantiate1 (Var x) t'))
+    return p
 check e t = do
    infered <- infer e
-   unify t infered
+   -- figure out how to do this
+   unless (_quote)
+     tyErr $ MistmatchErr _h _2
+check _ _ = tyErr $ MiscErr "checking failed"
 
 -- The second judgement is a inference judgement which
 -- attempts to compute a type for term based on information.
 -- We intermix these two judgements to type check a term.
 infer :: TyTerm -> TypeCheck TyTerm
 infer (Let x e _) = do -- handle body here
-    (bindName x) `fmap` (infer e)
-    lookupT x
+    -- (bindName x) `fmap` (infer e)
+    -- lookupT x
+    return $ error "a"
 infer (Ascribe e p) = do
     check p Type
     let t = eval p
     check e t
     return t
 infer Type = return Type
-infer (Pi _ _) = tyError $ UnimplementedErr "can't check pi types"
+infer (Pi argT body) = do
+  check argT Type
+  let t = eval argT
+  -- x <- freshName
+  check (instantiate1 t body) Type
+  return Type
 infer (Var x) = lookupT x
 infer (Apply fun arg) = do
    funT <- infer fun
@@ -78,9 +93,8 @@ infer _ = tyError InferenceErr
 -- form. This probably doesn't work in general but
 -- this will work for the time being.
 unify :: TyTerm -> TyTerm -> TypeCheck TyTerm
-unify t1 t2
-  | t1 == t2 = return t1
-  | otherwise = tyError $ MismatchErr t1 t2
+unify (Var _) (Var _) =
+unify t1 t2 = tyError $ MismatchErr t1 t2
 
 -- Create a monadic type error.
 tyError :: TypeErr -> TypeCheck a
@@ -88,7 +102,11 @@ tyError e = lift $ Left e
 
 -- Generate a fresh name for type checking.
 freshName :: TypeCheck TyName
-freshName = tyError $ UnimplementedErr "create a fresh name with the counter in the state"
+freshName = do
+   s <- get
+   let tyName = "freshName___" ++ (show (counter s))
+   put (s { counter = (counter s) + 1 })
+   return tyName
 
 -- Lookup the type corresponding to a name.
 lookupT :: TyName -> TypeCheck TyTerm
@@ -98,23 +116,24 @@ lookupT n = do
         Nothing -> tyError $ NameErr n
         Just t  -> return t
 
-bindName :: TyName -> Type -> TypeCheck ()
-bindName n ty = do
-  ctxt <- get
-  put $ ctxt { nameMap = M.insert n ty (nameMap ctxt) }
-
-eval = id
+bindName :: TyName -> Type -> TypeCheck a -> TypeCheck a
+bindName n ty action = do
+    ctxt <- get
+    put $ ctxt { nameMap = M.insert n ty (nameMap ctxt) }
+    result <- action
+    put ctxt
+    return result
 
 -- Typechecking and evaluation are intertwined so we must
 -- defined the evaluation relation here.
-{-eval :: Term a -> Term a-}
-{-eval (Ascribe e _) = eval e-}
-{-eval Type = Type-}
-{-eval (Pi p scope) = Pi (eval p) (scope >>>= eval)-}
-{-eval v @ (Var _)  = v-}
-{-eval (Apply e e') =-}
-    {-case eval e of-}
-      {-Lam scope -> eval (instantiate _somethign e')-}
-      {-n         -> Apply n (eval e')-}
-{-eval (Lam scope)   = Lam (scope >>>= eval)-}
+eval :: Term a -> Term a
+eval (Ascribe e _) = eval e
+eval Type = Type
+eval (Pi p scope) = Pi (eval p) (toScope $ eval $ fromScope scope)
+eval v @ (Var _)  = v
+eval (Apply e e') =
+    case eval e of
+      Lam scope -> eval (instantiate1 e' scope)
+      n         -> Apply n (eval e')
+eval (Lam scope) = Lam (toScope $ eval $ fromScope scope)
 
