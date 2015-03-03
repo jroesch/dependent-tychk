@@ -54,9 +54,9 @@ check (Lam scope) p @ (Pi t t') = do
 check e t = do
    infered <- infer e
    -- figure out how to do this
-   unless (_quote)
-     tyErr $ MistmatchErr _h _2
-check _ _ = tyErr $ MiscErr "checking failed"
+   case infered == t of
+     False -> tyError $ MismatchErr e t
+     True  -> return t
 
 -- The second judgement is a inference judgement which
 -- attempts to compute a type for term based on information.
@@ -86,15 +86,7 @@ infer (Apply fun arg) = do
              _ -> tyError $ MiscErr "failed in typing app"
    check arg argT
    return $ eval (instantiate1 arg body)
-infer _ = tyError InferenceErr
-
--- Attempt to unify two terms. For the time being
--- we require that these terms have the exact same
--- form. This probably doesn't work in general but
--- this will work for the time being.
-unify :: TyTerm -> TyTerm -> TypeCheck TyTerm
-unify (Var _) (Var _) =
-unify t1 t2 = tyError $ MismatchErr t1 t2
+infer x = tyError $ MiscErr $ show x
 
 -- Create a monadic type error.
 tyError :: TypeErr -> TypeCheck a

@@ -6,10 +6,10 @@ import Prelude.Extras
 
 data Term a = Ascribe (Term a) (Term a)       -- e :: T
             | Type                            -- Type
-            | Pi (Term a) (Scope () Term a)  -- (x : A) => e
+            | Pi (Term a) (Scope () Term a)   -- (x : A) => e
             | Var a                           -- x
             | Apply (Term a) (Term a)         -- e e'
-            | Lam (Scope () Term a)          -- \x -> e
+            | Lam (Scope () Term a)           -- \x -> e
             | Let a (Term a) (Maybe (Term a)) -- let e = x ?(in t)
             deriving (Eq, Ord, Show, Read)
 
