@@ -10,9 +10,9 @@ $alpha = [a-zA-Z]		-- alphabetic characters
 tokens :-
 
   $white+				                ;
-  \-\>                          { \s -> TArrow }
+  (\-\>|→)                      { \s -> TArrow }
   pi                            { \s -> TForall }
-  \\                            { \s -> TLambda }
+  (\\|λ)                        { \s -> TLambda }
   let                           { \s -> TLet    }
   in                            { \s -> TIn     }
   $alpha [$alpha $digit \_ \']* { \s -> TVar s }
