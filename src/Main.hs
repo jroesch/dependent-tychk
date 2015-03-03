@@ -9,6 +9,7 @@ import qualified Data.Map as M
 import Hubris.Parser
 import Hubris.Syntax
 import Hubris.TypeCheck
+import Hubris.Pretty
 import Control.Monad.Trans (lift)
 
 repl :: IO ()

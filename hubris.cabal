@@ -24,6 +24,7 @@ executable hubris
       Hubris.Parser.Tokens
       Hubris.Syntax
       Hubris.TypeCheck
+      Hubris.Pretty
     -- other-extensions:
     build-depends:
         base >=4.7 && <4.8,
@@ -35,7 +36,8 @@ executable hubris
         prelude-extras,
         array,
         containers,
-        mtl
+        mtl,
+        pretty
     build-tools:
       alex, happy
     -- hs-source-dirs:
