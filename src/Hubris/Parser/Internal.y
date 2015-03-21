@@ -22,6 +22,7 @@ import Data.List
       '*'             { TStar }
       ':'             { TColon }
       arrow           { TArrow }
+      fatarrow        { TFatArrow }
       '.'             { TDot }
       '('             { TLParens }
       ')'             { TRParens }
@@ -33,6 +34,7 @@ Term : Term0 ':' Term0               { Ascribe $1 $3 }
      | lambda var arrow Term         { Lam (abstract1 $2 $4) }
      | forall var ':' Term0 '.' Term { Pi $4 (abstract1 $2 $6) }
      | let var '=' Term0 LetExpr     { Let $2 $4 $5 }
+     | Term0 fatarrow Term0          { Pi $1 (abstract1 "_" $3) }
      | Term0                         { $1 }
 
 Term0 : '*'          { Type }

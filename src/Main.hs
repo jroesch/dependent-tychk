@@ -36,13 +36,13 @@ repl = runInputT settings (loop emptyContext)
                        Left doc -> do
                            outputStrLn $ "Error! Tokens left: " ++ doc
                        Right term -> do
-                           outputStrLn $ "Parsed: " ++ show term
+                           outputStrLn $ "Parsed: " ++ (show $ pretty term)
                            case typeCheckWithContext emptyContext term of
                              Left e -> do
                                outputStrLn ("TypeError: " ++ (show e))
                              Right (result, ctxt') -> do
-                               outputStrLn $ "Typecheck: " ++ show result
-                              
+                               outputStrLn $ "Typecheck: " ++ (show $ pretty term)
+
 
 data Command = Quit
              | Help

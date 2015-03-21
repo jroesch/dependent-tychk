@@ -6,19 +6,26 @@ import qualified Data.Map as M
 
 import Hubris.Syntax
 
+-- The type of name we use for type checking.
 type TyName = String
 
+-- A convenience type for documentation purposes.
 type Type = Term TyName
+
+-- A term parametrized by TyName.
 type TyTerm = Term TyName
 
+-- A mapping of names to types (terms).
 data Context = Context { nameMap :: M.Map TyName Type, counter :: Integer }
 
 instance Show Context where
     show (Context nm _) = show nm
 
+-- A context with no names, and types.
 emptyContext :: Context
 emptyContext = Context { nameMap = M.empty, counter = 0 }
 
+-- A type error
 data TypeErr = InferenceErr
              | NameErr String
              | MismatchErr TyTerm TyTerm
@@ -26,6 +33,7 @@ data TypeErr = InferenceErr
              | UnimplementedErr String
              deriving (Show)
 
+-- The monad we will use for type checking, we support state (StateT) and failure (Either).
 type TypeCheck a = StateT Context (Either TypeErr) a
 
 -- Typechecking takes a context Var -> Type, a Term to check
@@ -33,6 +41,7 @@ type TypeCheck a = StateT Context (Either TypeErr) a
 typeCheck :: Context -> TyTerm -> Either TypeErr TyTerm
 typeCheck ctxt tm = evalStateT (infer tm) ctxt
 
+-- Returns both the typechecked term and the final context.
 typeCheckWithContext :: Context -> TyTerm -> Either TypeErr (TyTerm, Context)
 typeCheckWithContext ctxt tm = runStateT (infer tm) ctxt
 
@@ -41,17 +50,17 @@ typeCheckWithContext ctxt tm = runStateT (infer tm) ctxt
 
 -- This first of which `check` is a checking judgement
 -- which asserts that a term checks to a certain type.
---
+
 -- If we read the rules from LambdaPi we have two cases
 -- that we must check, either we are executing the judgment
 -- that a term must check with a certain type or we are checking
 -- a lambda term annotated with a type.
 check :: TyTerm -> TyTerm -> TypeCheck TyTerm
-check (Lam scope) p @ (Pi t t') = do
+check (Lam scope) p @ (Pi t t') = do -- LAM
     x <- freshName
     bindName x t (check (instantiate1 (Var x) scope) (instantiate1 (Var x) t'))
     return p
-check e t = do
+check e t = do -- CHK
    infered <- infer e
    -- figure out how to do this
    case infered == t of
@@ -65,21 +74,21 @@ infer :: TyTerm -> TypeCheck TyTerm
 infer (Let x e _) = do -- handle body here
     -- (bindName x) `fmap` (infer e)
     -- lookupT x
-    return $ error "a"
-infer (Ascribe e p) = do
+    return $ error "let "
+infer (Ascribe e p) = do -- ANN
     check p Type
     let t = eval p
     check e t
     return t
-infer Type = return Type
-infer (Pi argT body) = do
+infer Type = return Type -- STAR
+infer (Pi argT body) = do -- PI
   check argT Type
   let t = eval argT
   -- x <- freshName
   check (instantiate1 t body) Type
   return Type
-infer (Var x) = lookupT x
-infer (Apply fun arg) = do
+infer (Var x) = lookupT x -- VAR
+infer (Apply fun arg) = do -- APP
    funT <- infer fun
    (argT, body) <- case funT of
              Pi argT body -> return (argT, body)
@@ -108,6 +117,7 @@ lookupT n = do
         Nothing -> tyError $ NameErr n
         Just t  -> return t
 
+-- Bind a name `n` with type `ty` in scope for `action`.
 bindName :: TyName -> Type -> TypeCheck a -> TypeCheck a
 bindName n ty action = do
     ctxt <- get

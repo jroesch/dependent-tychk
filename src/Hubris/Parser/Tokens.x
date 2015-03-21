@@ -11,13 +11,14 @@ tokens :-
 
   $white+				                ;
   (\-\>|→)                      { \s -> TArrow }
+  =\>                           { \s -> TFatArrow }
   pi                            { \s -> TForall }
   (\\|λ)                        { \s -> TLambda }
   let                           { \s -> TLet    }
   in                            { \s -> TIn     }
+  \Type                         { \s -> TStar }
   $alpha [$alpha $digit \_ \']* { \s -> TVar s }
   :                             { \s -> TColon }
-  \*                            { \s -> TStar }
   \.                            { \s -> TDot }
   \(                            { \s -> TLParens }
   \)                            { \s -> TRParens }
@@ -31,6 +32,7 @@ data Token = TLambda
            | TVar String
            | TColon
            | TArrow
+           | TFatArrow
            | TStar
            | TForall
            | TDot

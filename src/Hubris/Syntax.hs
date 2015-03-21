@@ -4,7 +4,7 @@ import Bound
 import Control.Applicative
 import Prelude.Extras
 
-data Term a = Ascribe (Term a) (Term a)       -- e :: T
+data Term a = Ascribe (Term a) (Term a)       -- e : T
             | Type                            -- Type
             | Pi (Term a) (Scope () Term a)   -- (x : A) => e
             | Var a                           -- x
