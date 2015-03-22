@@ -67,7 +67,8 @@ from the typing rules for LambdaPi in [^1].
 ```haskell
 data Term a = Ascribe (Term a) (Term a)       -- e : T
             | Type                            -- Type
-            | Pi (Term a) (Scope () Term a)   -- (pi x : A. e) scope abstracts away variable binding in a Term
+            | Pi (Term a) (Scope () Term a)   -- (pi x : A. e)
+            -- scope abstracts away variable binding in a Term
             | Var a                           -- x
             | Apply (Term a) (Term a)         -- e e'
             | Lam (Scope () Term a)           -- \x -> e
