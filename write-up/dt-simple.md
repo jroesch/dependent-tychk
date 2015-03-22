@@ -92,7 +92,7 @@ need to do evaluation. You will see this in the typing judgments
 expressed as $\Downarrow$.
 
 We have a set of definitions that are necessary to perform type
-checking.
+checking. The language we use is Haskell.
 
 ```haskell
 -- The type of name we use for type checking.
@@ -143,7 +143,7 @@ typeCheckWithContext ctxt tm = runStateT (infer tm) ctxt
 ```
 
 You can see that our type checker just calls to infer. Our implementation
-is that of a bidirectional type checker. The central idea is that we can
+is that of a bidirectional type checker. We have two functions, `infer` and `check`, which work together to perform type checking. The central idea is that we can
 make what information is inferable or checkable.
 
 This is different from normal type system presentations where the rules
@@ -175,7 +175,6 @@ check (Lam scope) p @ (Pi t t') = do -- LAM
     return p
 check e t = do -- CHK
    infered <- infer e
-   -- figure out how to do this
    case infered == t of
      False -> tyError $ MismatchErr e t
      True  -> return t
@@ -184,7 +183,7 @@ check e t = do -- CHK
 Now the meat is in the inference judgment which attempts to synthesize
 a type given a term. A key thing to notice here is how we move between
 the checking and inference judgment, in order for us to synthesize a
-term's type we may need to check sub-component's types.
+term's type we may need to check sub-component's types. In some places we need to call `eval`. This is because we have a dependency typed language where types maybe be terms.
 
 ```haskell
 -- The second judgement is a inference judgement which
